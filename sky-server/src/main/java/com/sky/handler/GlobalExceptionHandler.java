@@ -1,10 +1,14 @@
 package com.sky.handler;
 
 import com.sky.constant.MessageConstant;
+import com.sky.dto.EmployeeDTO;
 import com.sky.exception.BaseException;
 import com.sky.result.Result;
+import com.sky.service.EmployeeService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.sql.SQLIntegrityConstraintViolationException;
@@ -15,6 +19,12 @@ import java.sql.SQLIntegrityConstraintViolationException;
 @RestControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
+
+    private final EmployeeService employeeService;
+
+    public GlobalExceptionHandler(EmployeeService employeeService) {
+        this.employeeService = employeeService;
+    }
 
     /**
      * 捕获业务异常
@@ -27,6 +37,11 @@ public class GlobalExceptionHandler {
         return Result.error(ex.getMessage());
     }
 
+    /**
+     * 根据id查询员工信息
+     * @param ex
+     * @return
+     */
     @ExceptionHandler
     public Result exceptionHandler(SQLIntegrityConstraintViolationException ex){
         String message = ex.getMessage();
@@ -39,4 +54,5 @@ public class GlobalExceptionHandler {
             return Result.error(MessageConstant.UNKNOWN_ERROR);
         }
     }
+
 }

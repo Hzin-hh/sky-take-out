@@ -45,7 +45,6 @@ public class SetmealServiceImpl implements SetmealService {
      * @param status
      * @param id
      */
-    @Override
     public void startOrStop(Integer status, Long id) {
         //启售套餐时，判断套餐内是否有停售菜品，有停售菜品提示"套餐内包含未启售菜品，无法启售"
         if(status == StatusConstant.ENABLE){
@@ -71,7 +70,6 @@ public class SetmealServiceImpl implements SetmealService {
      * 修改套餐
      * @param setmealDTO
      */
-    @Override
     public void update(SetmealDTO setmealDTO) {
         Setmeal setmeal = new Setmeal();
         BeanUtils.copyProperties(setmealDTO,setmeal);
@@ -93,7 +91,6 @@ public class SetmealServiceImpl implements SetmealService {
      * @param id
      * @return
      */
-    @Override
     public SetmealVO getByIdWithDish(Long id) {
         Setmeal setmeal = setmealMapper.getById(id);
         SetmealVO setmealVO = new SetmealVO();
@@ -109,7 +106,6 @@ public class SetmealServiceImpl implements SetmealService {
      * 批量删除套餐
      * @param ids
      */
-    @Override
     @Transactional
     public void deleteBatch(List<Long> ids) {
         ids.forEach(id -> {
@@ -132,7 +128,6 @@ public class SetmealServiceImpl implements SetmealService {
      * @param setmealPageQueryDTO
      * @return
      */
-    @Override
     public PageResult pageQuery(SetmealPageQueryDTO setmealPageQueryDTO) {
         int pageNum = setmealPageQueryDTO.getPage();
         int pageSize = setmealPageQueryDTO.getPageSize();

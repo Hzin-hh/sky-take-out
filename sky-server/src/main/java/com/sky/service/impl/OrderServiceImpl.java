@@ -68,7 +68,6 @@ public class OrderServiceImpl implements OrderService {
      * 取消订单
      * @param id
      */
-    @Override
     public void userCancelById(Long id) throws Exception {
         // 根据id查询订单
         Orders ordersDB = orderMapper.getById(id);
@@ -110,7 +109,6 @@ public class OrderServiceImpl implements OrderService {
      * 客户催单
      * @param id
      */
-    @Override
     public void reminder(Long id) {
         // 根据id查询订单
         Orders ordersDB = orderMapper.getById(id);
@@ -134,7 +132,6 @@ public class OrderServiceImpl implements OrderService {
      *
      * @param id
      */
-    @Override
     public void complete(Long id) {
         // 根据id查询订单
         Orders ordersDB = orderMapper.getById(id);
@@ -158,7 +155,6 @@ public class OrderServiceImpl implements OrderService {
      *
      * @param id
      */
-    @Override
     public void delivery(Long id) {
         // 根据id查询订单
         Orders ordersDB = orderMapper.getById(id);
@@ -181,7 +177,6 @@ public class OrderServiceImpl implements OrderService {
      *
      * @param ordersCancelDTO
      */
-    @Override
     public void cancel(OrdersCancelDTO ordersCancelDTO) throws Exception {
         // 根据id查询订单
         Orders ordersDB = orderMapper.getById(ordersCancelDTO.getId());
@@ -212,7 +207,6 @@ public class OrderServiceImpl implements OrderService {
      * 商家拒单
      * @param ordersRejectionDTO
      */
-    @Override
     public void rejection(OrdersRejectionDTO ordersRejectionDTO) throws Exception {
         Orders ordersDB = orderMapper.getById(ordersRejectionDTO.getId());
 
@@ -246,7 +240,6 @@ public class OrderServiceImpl implements OrderService {
     /**
      * 商家接单
      */
-    @Override
     public void confirm(OrdersConfirmDTO ordersConfirmDTO) {
         Orders orders = Orders.builder()
                 .id(ordersConfirmDTO.getId())
@@ -260,7 +253,6 @@ public class OrderServiceImpl implements OrderService {
      * 各个状态的订单数量统计
      * @return
      */
-    @Override
     public OrderStatisticsVO statistics() {
         Integer confirmed = orderMapper.countStatus(Orders.CONFIRMED);
         Integer deliveryInProgress = orderMapper.countStatus(Orders.DELIVERY_IN_PROGRESS);
@@ -280,7 +272,6 @@ public class OrderServiceImpl implements OrderService {
      * @param ordersPageQueryDTO
      * @return
      */
-    @Override
     public PageResult pageQuery4Admin(OrdersPageQueryDTO ordersPageQueryDTO) {
         PageHelper.startPage(ordersPageQueryDTO.getPage(),ordersPageQueryDTO.getPageSize());
         Page<Orders> page = (Page<Orders>) orderMapper.pageQuery(ordersPageQueryDTO);
@@ -327,7 +318,6 @@ public class OrderServiceImpl implements OrderService {
      * 再来一单
      * @param id
      */
-    @Override
     public void repetition(Long id) {
         // 查询当前用户id
         Long userId = BaseContext.getCurrentId();
@@ -356,7 +346,6 @@ public class OrderServiceImpl implements OrderService {
      * @param historyOrdersPageQueryDTO
      * @return
      */
-    @Override
     public PageResult pageQuery4User(HistoryOrdersPageQueryDTO historyOrdersPageQueryDTO) {
         PageHelper.startPage(historyOrdersPageQueryDTO.getPage(),historyOrdersPageQueryDTO.getPageSize());
         OrdersPageQueryDTO ordersPageQueryDTO = new OrdersPageQueryDTO();
@@ -388,7 +377,6 @@ public class OrderServiceImpl implements OrderService {
      * @param id
      * @return
      */
-    @Override
     public OrderVO details(Long id) {
         OrderVO orderVO = new OrderVO();
         Orders orders = orderMapper.getById(id);
@@ -406,7 +394,6 @@ public class OrderServiceImpl implements OrderService {
      * @return
      */
     @Transactional
-    @Override
     public OrderSubmitVO submitOrder(OrdersSubmitDTO ordersSubmitDTO) {
 
         //处理各种业务异常（地址簿为空，购物车数据为空）

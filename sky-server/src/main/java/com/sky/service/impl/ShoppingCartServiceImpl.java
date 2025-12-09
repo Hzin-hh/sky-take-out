@@ -31,7 +31,6 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
     /**
      * 清空购物车
      */
-    @Override
     public void cleanShoppingCart() {
         Long userId = BaseContext.getCurrentId();
         shoppingCartMapper.deleteByUserId(userId);
@@ -41,7 +40,6 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
      * 查看购物车
      * @return
      */
-    @Override
     public List<ShoppingCart> showShoppingCart() {
         //获取到当前微信用户的id
         Long userId = BaseContext.getCurrentId();
@@ -56,7 +54,6 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
      * 添加购物车
      * @param shoppingCartDTO
      */
-    @Override
     public void addShoppingCart(ShoppingCartDTO shoppingCartDTO) {
         //判断当前加入到购物车中的商品是否已经存在了
         ShoppingCart shoppingCart = new ShoppingCart();

@@ -39,7 +39,6 @@ public class DishServiceImpl implements DishService {
      * 根据id修改菜品基本信息和对应的口味信息
      * @param dishDTO
      */
-    @Override
     public void updateWithFlavor(DishDTO dishDTO) {
         //修改菜品表基本信息
         Dish dish = new Dish();
@@ -65,7 +64,6 @@ public class DishServiceImpl implements DishService {
      * @param id
      * @return
      */
-    @Override
     public DishVO getByIdWithFlavor(Long id) {
         //根据id查询菜品数据
         Dish dish = dishMapper.getById(id);
@@ -85,7 +83,6 @@ public class DishServiceImpl implements DishService {
      * 菜品批量删除
      * @param ids
      */
-    @Override
     public void deleteBatch(List<Long> ids) {
         //判断当前菜品是否能够删除---是否存在起售中的菜品
         for(Long id : ids){
@@ -121,7 +118,6 @@ public class DishServiceImpl implements DishService {
      * @param dishPageQueryDTO
      * @return
      */
-    @Override
     public PageResult pageQuery(DishPageQueryDTO dishPageQueryDTO) {
         PageHelper.startPage(dishPageQueryDTO.getPage(),dishPageQueryDTO.getPageSize());
         Page<DishVO> page = dishMapper.pageQuery(dishPageQueryDTO);
@@ -159,7 +155,6 @@ public class DishServiceImpl implements DishService {
      * @param status
      * @param id
      */
-    @Override
     public void startOrStop(Integer status,Long id) {
         Dish dish = dishMapper.getById(id);
         dish.setStatus(status);
@@ -171,7 +166,6 @@ public class DishServiceImpl implements DishService {
      * @param categoryId
      * @return
      */
-    @Override
     public List<Dish> list(Long categoryId) {
         Dish dish = Dish.builder()
                 .categoryId(categoryId)

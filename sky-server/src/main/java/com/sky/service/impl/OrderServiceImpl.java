@@ -88,12 +88,12 @@ public class OrderServiceImpl implements OrderService {
 
         // 订单处于待接单状态下取消，需要进行退款
         if (ordersDB.getStatus().equals(Orders.TO_BE_CONFIRMED)) {
-            //调用微信支付退款接口
-            weChatPayUtil.refund(
-                    ordersDB.getNumber(), //商户订单号
-                    ordersDB.getNumber(), //商户退款单号
-                    new BigDecimal(0.01),//退款金额，单位 元
-                    new BigDecimal(0.01));//原订单金额
+            // //调用微信支付退款接口
+            // weChatPayUtil.refund(
+            //         ordersDB.getNumber(), //商户订单号
+            //         ordersDB.getNumber(), //商户退款单号
+            //         new BigDecimal(0.01),//退款金额，单位 元
+            //         new BigDecimal(0.01));//原订单金额
 
             //支付状态修改为 退款
             orders.setPayStatus(Orders.REFUND);
@@ -104,6 +104,29 @@ public class OrderServiceImpl implements OrderService {
         orders.setCancelReason("用户取消");
         orders.setCancelTime(LocalDateTime.now());
         orderMapper.update(orders);
+    }
+
+    /**
+     * 客户催单
+     * @param id
+     */
+    @Override
+    public void reminder(Long id) {
+        // 根据id查询订单
+        Orders ordersDB = orderMapper.getById(id);
+
+        // 校验订单是否存在
+        if (ordersDB == null) {
+            throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
+        }
+
+        Map map = new HashMap<>();
+        map.put("type",2);//1表示来电提醒 2表示客户催单
+        map.put("orderId",id);
+        map.put("content","订单号：" + ordersDB.getNumber());
+
+        //通过websocket向客户端浏览器推送消息
+        webSocketServer.sendToAllClient(JSON.toJSONString(map));
     }
 
     /**
@@ -165,22 +188,23 @@ public class OrderServiceImpl implements OrderService {
 
         //支付状态
         Integer payStatus = ordersDB.getPayStatus();
+        Orders orders = new Orders();
         if (payStatus == Orders.PAID) {
             //用户已支付，需要退款
-            String refund = weChatPayUtil.refund(
-                    ordersDB.getNumber(),
-                    ordersDB.getNumber(),
-                    new BigDecimal(0.01),
-                    new BigDecimal(0.01));
-            log.info("申请退款：{}", refund);
+            // String refund = weChatPayUtil.refund(
+            //         ordersDB.getNumber(),
+            //         ordersDB.getNumber(),
+            //         new BigDecimal(0.01),
+            //         new BigDecimal(0.01));
+            // log.info("申请退款：{}", refund);
+
+            // 管理端取消订单需要退款，根据订单id更新订单状态、取消原因、取消时间
+            orders.setId(ordersCancelDTO.getId());
+            orders.setStatus(Orders.CANCELLED);
+            orders.setCancelReason(ordersCancelDTO.getCancelReason());
+            orders.setCancelTime(LocalDateTime.now());
         }
 
-        // 管理端取消订单需要退款，根据订单id更新订单状态、取消原因、取消时间
-        Orders orders = new Orders();
-        orders.setId(ordersCancelDTO.getId());
-        orders.setStatus(Orders.CANCELLED);
-        orders.setCancelReason(ordersCancelDTO.getCancelReason());
-        orders.setCancelTime(LocalDateTime.now());
         orderMapper.update(orders);
     }
 
@@ -199,21 +223,22 @@ public class OrderServiceImpl implements OrderService {
 
         //支付状态
         Integer payStatus = ordersDB.getPayStatus();
+        Orders orders = new Orders();
         if (payStatus == Orders.PAID) {
             //用户已支付，需要退款
-            String refund = weChatPayUtil.refund(
-                    ordersDB.getNumber(),
-                    ordersDB.getNumber(),
-                    new BigDecimal(0.01),
-                    new BigDecimal(0.01));
-            log.info("申请退款：{}", refund);
-        }
+            // String refund = weChatPayUtil.refund(
+            //         ordersDB.getNumber(),
+            //         ordersDB.getNumber(),
+            //         new BigDecimal(0.01),
+            //         new BigDecimal(0.01));
+            // log.info("申请退款：{}", refund);
 
-        Orders orders = new Orders();
-        orders.setId(ordersDB.getId());
-        orders.setStatus(Orders.CANCELLED);
-        orders.setRejectionReason(ordersRejectionDTO.getRejectionReason());
-        orders.setCancelTime(LocalDateTime.now());
+            //拒单需要退款，根据订单id更新订单状态、拒单原因、取消时间
+            orders.setId(ordersDB.getId());
+            orders.setStatus(Orders.CANCELLED);
+            orders.setRejectionReason(ordersRejectionDTO.getRejectionReason());
+            orders.setCancelTime(LocalDateTime.now());
+        }
 
         orderMapper.update(orders);
     }
@@ -463,14 +488,38 @@ public class OrderServiceImpl implements OrderService {
         //         "苍穹外卖订单", //商品描述
         //         user.getOpenid() //微信用户的openid
         // );
+        // if (jsonObject.getString("code") != null && jsonObject.getString("code").equals("ORDERPAID")) {
+        //     throw new OrderBusinessException("该订单已支付");
+        // }
+
         JSONObject jsonObject = new JSONObject();
-
-        if (jsonObject.getString("code") != null && jsonObject.getString("code").equals("ORDERPAID")) {
-            throw new OrderBusinessException("该订单已支付");
-        }
-
+        jsonObject.put("code","ORDERPAID");
         OrderPaymentVO vo = jsonObject.toJavaObject(OrderPaymentVO.class);
         vo.setPackageStr(jsonObject.getString("package"));
+
+        //为替代微信支付成功后的数据库订单状态更新，多定义一个方法进行修改
+        Integer OrderPaidStatus = Orders.PAID;//支付状态：已支付
+        Integer OrderStatus = Orders.TO_BE_CONFIRMED;//订单状态：待接单
+
+        //发现没有将支付时间 check_out属性赋值，所以在这里更新
+        LocalDateTime check_out_time = LocalDateTime.now();
+
+        //获取订单号码
+        String orderNumber = ordersPaymentDTO.getOrderNumber();
+
+        log.info("调用updateStatus，用于替换微信支付更新数据库状态的问题");
+        orderMapper.updateStatus(OrderStatus,OrderPaidStatus,check_out_time,orderNumber);
+
+        Map map = new HashMap();
+        map.put("type", 1);// 消息类型，1表示来单提醒
+        //获取订单id
+        Orders orders=orderMapper.getByNumber(orderNumber);
+        map.put("orderId", orders.getId());
+        map.put("content", "订单号：" + orderNumber);
+
+        // 通过WebSocket实现来单提醒，向客户端浏览器推送消息
+        webSocketServer.sendToAllClient(JSON.toJSONString(map));
+        log.info("来单提醒：{}", JSON.toJSONString(map));
 
         return vo;
     }

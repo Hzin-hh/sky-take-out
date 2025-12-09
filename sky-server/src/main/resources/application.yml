@@ -57,3 +57,7 @@ sky:
     access-key-id: ${sky.alioss.access-key-id}
     access-key-secret: ${sky.alioss.access-key-secret}
     bucket-name: ${sky.alioss.bucket-name}
+  shop:
+    address: 南开大学津南校区理科组团5A617
+  baidu:
+    ak: jv49pCt7ibWzWAFB7El2uEWQwQ9RQDMO

@@ -70,7 +70,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
         if(list != null && list.size() > 0){
             ShoppingCart cart = list.get(0);
             cart.setNumber(cart.getNumber() + 1);
-            shoppingCartMapper.upddateNumberById(cart);
+            shoppingCartMapper.updateNumberById(cart);
         }else{
             //如果不存在，需要插入一条购物车数据
             Long dishId = shoppingCart.getDishId();
